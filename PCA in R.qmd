@@ -1,0 +1,551 @@
+---
+title: "Introduction to Principal Component Analysis (PCA) in R"
+subtitle: "Understanding Dimensionality Reduction"
+author: "Mahesh Divakaran"
+date: October 07, 2024
+institute: "Amity University, Lucknow"
+titlegraphic: "amity.png"
+execute:
+  echo: true
+  fig-width: 8
+  fig-height: 5
+  fig-align: center
+  results: asis
+knitr:
+  opts_chunk:
+    collapse: true
+    comment: "#>" 
+    R.options:
+      echo: true
+      out-height: '50%'
+      knitr.graphics.auto_pdf: true
+format: 
+  beamer:
+    slide-level: 2
+    number-sections: false   # Disable section numbering
+    fig-align: center
+    fig-theme: minimal
+    fontsize: "18 pt"
+    df-print: paged
+    aspectratio: 1610
+    navigation: horizontal
+    theme: AnnArbor
+    colortheme: dolphin
+    fonttheme: "structurebold"
+    footer: "Copyright © October 2024. Amity University"
+---
+
+```{r, include=FALSE}
+library(kableExtra)
+
+```
+
+# Introduction
+
+## Why Do We Need PCA?
+
+-   In industries like retail, we often work with high-dimensional data.
+-   Imagine analyzing customer data with 5 characteristics:
+    -   *Monthly expense, Age, Gender, Purchase frequency, Product rating*
+-   **Challenges with High-Dimensional Data:**
+    -   Visualizing 5 dimensions is not intuitive for human understanding.
+    -   It becomes difficult to identify patterns and relationships among variables.
+    -   Increased complexity can lead to overfitting in models, reducing generalization.
+-   **Principal Component Analysis (PCA) simplifies this problem:**
+    -   Reduces the dimensionality of the data.
+    -   Captures the most important information by identifying patterns.
+    -   Helps visualize complex data structures in 2D or 3D.
+    -   **Example:** By reducing 5 dimensions into 2 or 3 principal components, we can create scatter plots that highlight key groupings or trends among customers.
+-   **Benefits of PCA:**
+    -   Enhances interpretability while preserving the variability in the data.
+    -   Facilitates data exploration and analysis, aiding in decision-making processes.
+    -   Useful for subsequent machine learning algorithms by reducing noise and improving performance.
+
+## Challenges with High-Dimensional Data
+
+-   **Curse of Dimensionality:**
+    -   As dimensions increase, it becomes harder to analyze and interpret data.
+    -   Models become more complex and may suffer from overfitting.
+    -   **Impact:** Increased computational cost and time for training models.
+-   **Redundant Information:**
+    -   High-dimensional data often contains correlated variables, adding noise.
+    -   **Example:** Monthly expense and purchase frequency might be correlated, leading to redundant insights.
+-   **Visual Limitations:**
+    -   Human beings are limited to visualizing up to 3 dimensions effectively.
+    -   Higher dimensions can lead to misinterpretations.
+-   **PCA helps address these challenges:**
+    -   By condensing the data into fewer, uncorrelated dimensions.
+    -   **Result:** Easier to visualize and interpret relationships among variables.
+
+## What is PCA?
+
+-   PCA is a statistical technique for **dimensionality reduction**.
+-   It transforms the original data into a new set of variables (principal components), which are:
+    -   **Uncorrelated** with each other.
+    -   **Ordered** by the amount of variance they explain in the data.
+    -   **Example:** The first principal component accounts for the largest variance, while the second captures the next largest variance.
+-   **Key idea:** Keep the components that explain the most variance and discard the rest.
+-   **Visualization Aid:** PCA can generate 2D or 3D plots that illustrate how data points cluster, allowing for easier interpretation of customer segments.
+    -   **Practical Use:** Marketers can identify target segments based on purchasing behaviors.
+
+## Real-life Example: Retail Data
+
+-   Consider a dataset with the following customer information:
+    -   Monthly expense: \$300
+    -   Age: 27 years
+    -   Gender: Female
+    -   Purchase frequency: 12 times/month
+    -   Product rating: 4.5/5
+-   PCA would identify which of these characteristics contribute the most to customer behavior:
+    -   **For instance:** Monthly expense and purchase frequency might be the most significant.
+    -   **Customer Segmentation:** PCA can help categorize customers into segments based on spending behavior.
+-   **PCA Visualization:**
+    -   After PCA transformation, we might find that these two dimensions allow us to plot customers in a way that highlights spending patterns and purchasing behaviors.
+
+## How Does PCA Work? (5 Steps)
+
+1.  **Data Normalization**
+    -   Ensure all variables contribute equally by standardizing the data (mean 0, standard deviation 1).
+2.  **Covariance Matrix**
+    -   Compute the covariance matrix to capture relationships between variables.
+3.  **Eigenvectors and Eigenvalues**
+    -   Eigenvectors: Directions of maximum variance.
+    -   Eigenvalues: Amount of variance explained by each eigenvector.
+4.  **Select Principal Components**
+    -   Choose the eigenvectors with the highest eigenvalues (most variance).
+5.  **Transform Data**
+    -   Project the original data onto the new space formed by the principal components.
+
+## Applications of PCA
+
+-   **Finance:**
+    -   Analyze stock prices by reducing hundreds of variables (features) to a handful of principal components.
+    -   Forecast future prices by focusing on the most important factors.
+-   **Image Processing:**
+    -   Use PCA for image compression—reduce the size of an image while retaining important features.
+    -   In **face recognition**, PCA can identify key distinguishing features.
+-   **Healthcare:**
+    -   Dimensionality reduction in MRI scans to visualize large, complex datasets.
+    -   Use in **disease detection** from medical images.
+-   **Security:**
+    -   **Fingerprint recognition** systems apply PCA to extract the most relevant features from the fingerprint data (e.g., texture, ridge patterns).
+
+## Applications of PCA
+
+-   **Marketing:**
+    -   Segment customers based on purchase behaviors, identifying the principal factors that influence buying decisions.
+-   **Genomics:**
+    -   Analyze gene expression data to identify the most important genes driving a particular condition.
+-   **Sports Analytics:**
+    -   Evaluate player performance by reducing multiple performance metrics into principal components, focusing on key indicators.
+-   **E-commerce:**
+    -   Optimize product recommendations by identifying underlying customer preferences using PCA.
+
+## General Methods for Principal Component Analysis
+
+-   **Spectral Decomposition**: Examines the covariances/correlations between variables.
+-   **Singular Value Decomposition (SVD)**: Examines the covariances/correlations between individuals.
+
+### In R:
+
+-   `princomp()` uses spectral decomposition.
+-   `prcomp()` and `PCA()` \[FactoMineR\] use singular value decomposition (SVD).
+
+**Note**: SVD has better numerical accuracy, hence `prcomp()` is generally preferred over `princomp()`.
+
+### `prcomp()` vs `princomp()` in R
+
+\tiny
+
+| **prcomp()** | **princomp()** | **Description** |
+|-----------------|-----------------|--------------------------------------|
+| `sdev` | `sdev` | Standard deviations of the principal components |
+| `rotation` | `loadings` | Matrix of variable loadings (columns are eigenvectors) |
+| `center` | `center` | Variable means (subtracted before PCA) |
+| `scale` | `scale` | Variable standard deviations (scaling applied) |
+| `x` | `scores` | Coordinates of observations on principal components |
+
+## Arguments for `prcomp()` and `princomp()`
+
+**Arguments for `prcomp()`**:
+
+-   `x`: Numeric matrix or data frame.
+-   `scale`: Logical, scales variables to unit variance before analysis.
+
+**Arguments for `princomp()`**:
+
+-   `x`: Numeric matrix or data frame.
+-   `cor`: Logical, centers and scales data if `TRUE`.
+-   `scores`: Logical, calculates coordinates on principal components if `TRUE`.
+
+### Output of `prcomp()` and `princomp()`
+
+**Output Elements**:
+
+-   **`sdev`**: Standard deviations of principal components.
+-   **`rotation`** (`loadings` for `princomp()`): Matrix of variable loadings.
+-   **`center`**: Variable means (centered values).
+-   **`scale`**: Variable standard deviations.
+-   **`x`** (`scores` for `princomp()`): Coordinates of observations on the principal components.
+
+# Exploratory Data Analysis (EDA)
+
+## Getting the Data
+
+\small
+```{r}
+# Load the iris dataset
+data("iris")
+
+# Structure of the dataset
+str(iris)
+```
+
+## Data Summary
+
+\small
+```{r}
+
+# Summary statistics of the dataset
+summary(iris) %>% kable()
+```
+
+\tiny
+
+### The iris dataset contains 150 observations and 5 variables:
+
+-   Sepal Length
+-   Sepal Width
+-   Petal Length
+-   Petal Width
+-   Species (setosa, versicolor, virginica)
+-   Summary statistics show the range, quartiles, and mean values for each numerical variable.
+
+## Partition the Data
+
+\small
+```{r}
+# Set seed for reproducibility
+set.seed(111)
+
+# Split the data into training (80%) and testing (20%) sets
+ind <- sample(2, nrow(iris), replace = TRUE, prob = c(0.8, 0.2))
+
+# Partition the data
+training <- iris[ind == 1,]
+testing <- iris[ind == 2,]
+
+```
+
+-   The dataset is split into training and testing sets to build and evaluate models.
+-   Training Set: 80% of the data.
+-   Testing Set: 20% of the data. 
+
+## Exploratory Data Analysis (EDA) - Correlation
+
+\tiny
+```{r, out.height="50%", fig.align='center'}
+# Load the psych package for scatter plots and correlation analysis
+library(psych)
+
+# Create pair panels excluding the species factor
+pairs.panels(training[,-5],
+             gap = 0,
+             bg = c("red", "yellow", "blue")[training$Species],
+             pch = 21)
+
+```
+
+## Exploratory Data Analysis (EDA) - Correlation
+
+The scatter plots (lower triangle) and correlations (upper triangle) between numerical variables show relationships:
+
+-   Highly Correlated Pairs:
+  -   Petal Length and Petal Width
+  -   Sepal Length and Petal Length
+  -   Sepal Length and Petal Width
+-   These correlations indicate multicollinearity, which can negatively affect model performance.
+
+## Handling Multicollinearity with PCA
+
+### Problem
+
+-   Multicollinearity can lead to misleading results in predictive models.
+
+### Solution
+
+-   Apply Principal Component Analysis (PCA) to remove redundancy and extract uncorrelated components.
+
+- PCA transforms the original data into a set of principal components that explain the majority of the variance while addressing multicollinearity.
+- The first few components can capture most of the variability in the data, reducing the need for all original variables.
+
+## Check for Null Values
+
+The presence of missing values can bias the result of PCA.
+
+-   Before performing PCA, it is crucial to ensure there are no missing values in the dataset.
+-   In the iris dataset, no missing values are present as shown by the output of `colSums(is.na(iris))`.
+
+```{r}
+# Check for missing values
+colSums(is.na(iris))
+```
+
+# Principal Component Analysis (PCA)
+
+## Applying PCA
+
+\scriptsize
+```{r}
+# Apply PCA on training data
+pca_iris <- prcomp(training[,-5], scale = TRUE)
+
+# Summary of PCA
+summary(pca_iris)
+
+```
+\small
+
+#### Interpretation:
+
+- PC1 explains about 73.7% of the total variance in the data.
+- PC2 adds another 22.1%, leading to a cumulative proportion of 95.8% of the variance explained by the first two principal components.
+- PC3 and PC4 together contribute less than 5% of the remaining variance, meaning most of the information is captured by PC1 and PC2.
+
+Thus, for visualization purposes, PC1 and PC2 are sufficient to represent the dataset without significant loss of information.
+
+## Access to the PCA results
+
+\scriptsize
+```{r}
+# Load the factoextra package
+library(factoextra)
+# Results for Variables
+res.var <- get_pca_var(pca_iris)
+res.var$coord  %>% kable()        # Coordinates
+res.var$contrib %>% kable()           # Contributions to the PCs
+
+```
+
+## Access to the PCA results
+
+\scriptsize
+```{r}
+res.var$cos2  %>% kable()             # Quality of representation
+```
+
+## Access to the PCA results
+
+\tiny
+```{r}
+# Results for individuals
+res.ind <- get_pca_ind(pca_iris)
+res.ind$coord  %>% kable()            # Coordinates
+```
+
+## Access to the PCA results
+
+\tiny
+```{r}
+res.ind$contrib %>% kable()           # Contributions to the PCs
+```
+
+## Access to the PCA results
+
+\tiny
+```{r}
+res.ind$cos2   %>% kable()            # Quality of representation 
+```
+
+
+## Visualizing PCA Results
+
+- **Scree Plot:** Shows variance explained by each component.
+
+\tiny
+```{r, out.height="50%", fig.align='center'}
+# Visualize the percentage of variance explained by each component
+fviz_eig(pca_iris, addlabels = TRUE)
+```
+
+# Visualizing PCA
+
+## Visualizing PCA Results
+
+### Scree Plot
+
+#### Interpretation 
+- The scree plot shows the percentage of variance explained by each principal component (PC).
+- PC1 explains around 73.7% of the variance, which means it captures most of the variability in the data.
+- PC2 explains an additional 22.1% of the variance.
+- Together, PC1 and PC2 explain about 95.8% of the total variance. This suggests that the first two principal components are sufficient for representing the dataset, reducing the dimensionality from 4 to 2 with minimal loss of information.
+
+## Visualizing PCA Results
+
+- **PCA Plot:** Visualizes species in the reduced PCA space, aiding interpretation.
+
+\tiny
+```{r, out.height="50%", fig.align='center'}
+# Plot individuals based on principal components
+fviz_pca_ind(pca_iris,
+             col.ind = training$Species,
+             palette = c("#00AFBB", "#E7B800", "#FC4E07"),
+             addEllipses = TRUE,
+             legend.title = "Species")
+
+```
+
+## Visualizing PCA Results
+
+### PCA Individual Plot
+
+#### Interpretation
+- The PCA plot visualizes the relationship between data points (individuals) in the reduced principal component space (PC1 and PC2).
+- The three species of the iris dataset (`setosa`, `versicolor`, and `virginica`) are represented by different colors and symbols.
+- The points are clustered according to species, with clear separations between `setosa` (on the left), `versicolor` (center), and `virginica` (right).
+- Ellipses represent the confidence regions for each species, showing that `setosa` is distinctly separated from the other two species, while there is slight overlap between `versicolor` and `virginica.`
+- This plot shows how PCA has reduced the data to two dimensions while retaining the ability to distinguish between species.
+- This analysis indicates that PCA is effective in simplifying the dataset while maintaining most of the variance and keeping the species well-separated in the reduced feature space.
+
+## Graph of Individuals
+
+\small
+The plot below shows the individuals in the PCA space, where individuals with similar profiles are grouped together. The coloring is based on the cos2 value, representing the quality of representation for each individual.
+
+\scriptsize
+```{r, out.height="45%", fig.align='center'}
+# Visualize individuals' PCA
+fviz_pca_ind(pca_iris,
+             col.ind = "cos2", # Color by quality of representation
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE     # Avoid text overlapping
+)
+```
+
+
+## Biplot of the Attributes
+
+With the biplot, we can visualize the similarities and dissimilarities between the samples, and it further shows the impact of each attribute on each of the principal components.
+
+### Graph of the Variables
+
+\scriptsize
+```{r, out.height="50%", fig.align='center'}
+# Biplot of the variables
+fviz_pca_var(pca_iris, col.var = "black")
+```
+## Biplot of individuals and variables
+
+```{r}
+fviz_pca_biplot(pca_iris, repel = TRUE,
+                col.var = "#2E9FDF", # Variables color
+                col.ind = "#696969"  # Individuals color
+                )
+```
+
+
+## Biplot of the Attributes
+
+#### Interpretation
+
+- The biplot provides a way to visualize the relationship between the variables and the principal components. 
+- Here, Sepal Length and Petal Length are positively correlated, as indicated by their proximity on the plot, whereas Sepal Width shows a negative correlation with Sepal Length. 
+- Petal Width has a smaller contribution compared to the other variables along the first principal component (Dim 1), which explains 73.7% of the variation. Dim 2 explains an additional 22.1% of the variation.
+
+## Variables Contribution to Principal Components
+
+\scriptsize
+```{r, out.height="50%", fig.align='center'}
+# Visualize variables' contribution to the components
+fviz_cos2(pca_iris, choice = "var", axes = 1:2)
+
+```
+## Variables Contribution to Principal Components
+
+#### Interpretation
+- The plot above shows the Cos2 values for each variable with respect to the first two principal components. 
+- Variables such as Sepal Width and Petal Length have higher Cos2 values, meaning they contribute significantly to the first two principal components. 
+- A high Cos2 value indicates good representation of the variable on the corresponding principal component.
+
+## Biplot combined with Cos2 score for better representation
+
+\scriptsize
+```{r, out.height="50%", fig.align='center'}
+fviz_pca_var(pca_iris, col.var = "cos2", gradient.cols = c("black", "orange", "green"), repel = TRUE)
+
+```
+## Biplot combined with Cos2 score for better representation
+
+#### Interpretation
+
+- This plot combines the biplot with Cos2 information. The colors represent the quality of representation (Cos2) for each variable. 
+- Variables with higher Cos2 values are shown in green, indicating better representation in the biplot, such as `Sepal Width` and `Petal Length`. 
+- The variables with lower Cos2 values, such as `Sepal Length`, are shown in black, indicating a relatively lower contribution to the principal components.
+
+
+## Access to the PCA results
+
+```{r}
+library(factoextra)
+# Eigenvalues
+eig.val <- get_eigenvalue(pca_iris)
+eig.val%>% kable()
+```
+
+
+## PCA Conclusion
+The PCA conducted on the Iris dataset has yielded insightful results. Below is a comprehensive summary, including the visual interpretations from earlier images and the principal component loadings:
+
+### Key Findings:
+
+#### Explained Variance:
+The first two principal components (PC1 and PC2) capture a substantial amount of variance in the data, specifically 73.7% and 22.1% respectively, which together account for approximately 95.8% of the total variance. This suggests that these two components provide a very good approximation of the original dataset in lower dimensions.
+
+## PCA Conclusion
+
+### Key Findings:
+
+#### Variable Contributions (Cos2 and Loadings):
+
+- The Cos2 values and variable contribution plots indicate that Sepal Width and Petal Length contribute significantly to the first two principal components, while Petal Width and Sepal Length also play a role but to a slightly lesser extent.
+- The variable loadings (rotation) reveal that Sepal Length and Petal Length are positively correlated with PC1, while Sepal Width has a negative correlation with PC1 and a strong negative correlation with PC2. This is reflected in the PCA biplot where the vectors corresponding to these variables point in different directions, showing that these features contribute differently to the variance captured by each component.
+
+## PCA Conclusion
+
+### Key Findings:
+
+#### PCA Biplot (Variables):
+
+- The PCA biplot of variables shows that Sepal Length, Petal Length, and Petal Width are strongly aligned with PC1, indicating they have a higher influence on this principal component. On the other hand, Sepal Width is primarily aligned with PC2, demonstrating its influence is stronger on this component.
+- This separation of variables across components allows for better interpretation of how the original features are spread across the lower-dimensional space.
+
+#### Cos2 Quality of Representation:
+
+- The Cos2 plot confirms that all variables are well represented by the first two principal components, with Sepal Width and Petal Length showing particularly high values, indicating a strong contribution to these components.
+
+# Conclusion
+
+## PCA Conclusion
+
+### Key Findings:
+
+#### Graph of Individuals:
+
+- The graph of individuals illustrates that samples (individuals) with similar profiles are grouped together in the PCA plot. The gradient colors (ranging from blue to orange) indicate the quality of representation based on Cos2 values. Blue-colored individuals are well represented, while orange-shaded individuals are not as well represented by the first two components.
+- The separation of species is also visible in this plot, with clear groupings of different species reflecting their inherent differences in terms of the measured features (sepal length, sepal width, petal length, petal width).
+
+
+## PCA Conclusion
+
+### Conclusion
+
+- The PCA analysis of the `Iris dataset` shows that the majority of the variance can be captured by the first two components, with `PC1` being dominated by `Petal Length` and `Sepal Length`, and `PC2` being largely influenced by `Sepal Width`. 
+- This dimensionality reduction allows for a simplified yet effective visualization of the dataset, where species are naturally grouped according to their feature similarities. The results suggest that `Sepal Width` is a key feature for distinguishing between species in the context of the second component.
+
+- The visualizations such as the `Cos2 plot`, `PCA biplot of variables`, and the `PCA individual plot` further aid in interpreting the relationships between features and individuals, providing a strong foundation for deeper analysis or classification tasks using the reduced dataset.
+
+
+
+
+
+

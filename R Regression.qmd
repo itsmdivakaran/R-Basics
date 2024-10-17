@@ -1,0 +1,774 @@
+---
+title: "R Programming - Regression"
+author: "Mahesh Divakaran"
+date: October 07, 2024
+institute: "Amity University, Lucknow"
+titlegraphic: "amity.png"
+execute:
+  echo: true
+  fig-width: 8
+  fig-height: 5
+  results: asis
+knitr:
+  opts_chunk:
+    collapse: true
+    comment: "#>" 
+    R.options:
+      echo: true
+      out-height: '50%'
+      knitr.graphics.auto_pdf: true
+format: 
+  beamer:
+    slide-level: 2
+    fig-align: center
+    fig-theme: minimal
+    # incremental: true
+    fontsize: "18 pt"
+    df-print: paged
+    aspectratio: 1610
+    number-sections: false
+    navigation: horizontal
+    theme: AnnArbor
+    colortheme: dolphin
+    fonttheme: "structurebold"
+    footer: "Copyright © October 2024. Amity University"
+keep-tex: true
+---
+
+```{r,include=FALSE}
+library(ggplot2)
+  theme_set(theme_classic(base_size = 10) +   # Adjust base size for text
+  theme(
+    legend.text = element_text(size = 9.5),  # Set legend text size
+    legend.title = element_text(size = 12)  # Set legend title size
+  )
+)
+# Set global graphical parameters for base R
+options(ggplot2.continuous.colour="viridis") 
+
+knitr::opts_chunk$set(fig.align = 'center')
+```
+
+## Overview
+
+-   What is Regression
+-   Mtcars Dataset
+-   Data exploration (EDA)
+-   Visualizations
+-   Simple Linear Regression
+-   Multiple Linear Regression
+-   Logistic Regression
+-   Odds Ratio Interpretation
+
+# What is Regression?
+
+## Definition and Purpose
+
+-   **Regression** is a statistical technique used to estimate the relationships between a dependent variable (response) and one or more independent variables (predictors).
+-   **Purpose**:
+    -   To understand the strength and direction of the relationship between variables.
+    -   To predict future outcomes based on the relationships observed.
+-   **Application**:
+    -   Widely used in fields like medicine, economics, engineering, and the social sciences for tasks like forecasting, risk assessment, and optimization.
+-   **Key Concepts**:
+    -   **Dependent Variable (Y)**: The outcome you're trying to predict or explain.
+    -   **Independent Variables (X)**: The predictors used to explain or influence Y.
+    -   **Error Term (**$\epsilon$): Represents the unexplained variability in Y.
+
+## Types of Regression: Linear and Non-Linear Regression
+
+Regression can be broadly classified into two categories:
+
+-   **Linear Regression**: Models a straight-line relationship between the dependent and independent variables.
+-   **Non-Linear Regression**: Models a more complex, non-linear relationship between variables.
+
+## Types of Linear Regression
+
+-   **Linear Regression** assumes that the relationship between the dependent and independent variables is a straight line. Key types include:
+
+\scriptsize
+
+### 1. Simple Linear Regression
+
+-   **Definition**: Models the relationship between one independent variable (X) and one dependent variable (Y).
+-   **Formula**: $Y = \beta_0 + \beta_1 X + \epsilon$
+-   **Application**: Predicting outcomes based on a single predictor (e.g., predicting salary based on years of experience).
+
+### 2. Multiple Linear Regression
+
+-   **Definition**: Models the relationship between two or more independent variables and a dependent variable.
+-   **Formula**: $Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \ldots + \beta_n X_n + \epsilon$
+-   **Application**: Predicting outcomes based on multiple predictors (e.g., predicting house prices based on size, location, and number of rooms).
+
+\normalsize
+
+## Types of Non-Linear Regression
+\scriptsize
+-   **Non-Linear Regression** models relationships that cannot be captured by a straight line. It is used when the relationship between variables is more complex. Key types include:
+
+### 1. Logistic Regression
+
+-   **Definition**: Used when the dependent variable is binary (0/1 or Yes/No).
+-   **Formula**: $log(p / (1-p)) = \beta_0 + \beta_1X1 + ... + \beta_nXn$
+-   **Application**: Predicting probabilities, such as the likelihood of disease presence (yes/no).
+
+### 2. Poisson Regression
+
+-   **Definition**: Used when the dependent variable represents count data (number of occurrences).
+-   **Formula**: $log(λ) = \beta_0 + \beta_1X1 + ... + \beta_nXn$
+-   **Application**: Modeling the number of events, such as customer complaints or number of accidents.
+
+### 3. Polynomial Regression
+
+-   **Definition**: A form of regression that models the relationship as an nth-degree polynomial.
+-   **Formula**: $Y = \beta_0 + \beta_1X + \beta_2X^2 + ... + \beta_nX^n + \epsilon$
+-   **Application**: Capturing non-linear trends (e.g., modeling the growth curve of a population over time).
+
+\normalsize
+
+# Introduction to the mtcars Dataset
+
+## Overview of mtcars
+
+-   The **mtcars** dataset is built into R and contains data about various models of cars from the 1974 Motor Trend US magazine. - It includes 32 observations (cars) and 11 variables (attributes).
+
+### Variables in the mtcars Dataset
+
+-   **mpg**: Miles per gallon (fuel efficiency)
+-   **cyl**: Number of cylinders in the car
+-   **disp**: Displacement (in cubic inches)
+-   **hp**: Horsepower
+-   **drat**: Rear axle ratio
+-   **wt**: Weight (in 1000 lbs)
+-   **qsec**: 1/4 mile time
+-   **vs**: Engine type (0 = V/S, 1 = straight)
+-   **am**: Transmission (0 = automatic, 1 = manual)
+-   **gear**: Number of forward gears
+-   **carb**: Number of carburetors
+
+## Exploring the mtcars Dataset
+
+\tiny
+
+-   **dim()**: Returns the dimensions of the dataset (number of rows and columns).
+
+```{r}
+  dim(mtcars)
+```
+
+-   **summary()**: Provides a summary of each variable in the dataset, including statistics like min, max, mean, median, and quartiles.
+
+```{r}
+summary(mtcars)
+```
+
+## Exploring the mtcars Dataset
+
+-   **glimpse()**: A function from the`dplyr`package that provides a transposed view of the dataset, showing data types and the first few entries for each variable.
+
+\tiny
+
+```{r}
+library(dplyr)
+glimpse(mtcars)
+
+```
+
+-   **Dimensions**: The output from`dim(mtcars)`indicates there are 32 rows and 11 columns.
+
+-   **Summary Statistics**: The`summary(mtcars)`function gives insights into each variable, showing ranges and central tendencies.
+
+-   **Glimpse**: Using`glimpse(mtcars)`provides a quick overview of the dataset structure and types of variables.
+
+\normalsize
+
+# Exploratory Data Analysis (EDA)
+
+## Purpose of EDA
+
+-   To understand the distribution and relationships of variables in the mtcars dataset.
+-   To identify patterns, trends, and potential outliers.
+
+## 1: Summary Statistics
+
+\tiny
+
+```{r}
+# Summary statistics for mtcars
+summary(mtcars)
+```
+
+#### Insights from Summary
+
+-   **mpg**: Ranges from 10.4 to 33.9, with a mean of 20.1.
+-   **cyl**: Most cars have 4 or 6 cylinders, with a maximum of 8.
+-   **hp**: Horsepower ranges from 52 to 335, indicating a wide variance in engine power.
+
+\normalsize
+
+## Visualization of Relationships
+
+### Scatter Plot: mpg vs. wt
+
+\tiny
+
+```{r,out.height="50%"}
+library(ggplot2)
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_point() +
+  labs(title = "Fuel Efficiency vs. Weight",
+       x = "Weight (1000 lbs)",
+       y = "Miles per Gallon (mpg)")
+```
+
+#### Insights from Scatter Plot
+
+-   **Negative Correlation**: As weight increases, miles per gallon (mpg) generally decreases, indicating heavier cars are less fuel-efficient.
+
+\normalsize
+
+## Box Plot: mpg by Number of Cylinders
+
+\tiny
+
+```{r, out.height="50%"}
+ggplot(mtcars, aes(x = factor(cyl), y = mpg)) +
+  geom_boxplot() +
+  labs(title = "Fuel Efficiency by Number of Cylinders",
+       x = "Number of Cylinders",
+       y = "Miles per Gallon (mpg)")
+```
+
+### Insights from Box Plot
+
+-   **Cylinders and mpg**: Cars with 4 cylinders tend to have the highest mpg, while cars with 8 cylinders have the lowest, indicating a trend where more cylinders correspond to less fuel efficiency. \normalsize
+
+## Correlation Analysis
+
+\tiny
+
+```{r}
+# Correlation matrix
+cor_matrix <- cor(mtcars)
+print(cor_matrix)
+```
+
+## Correlation Analysis
+
+\tiny
+
+```{r, fig.align='center',fig.asp=.4}
+# Visualization of correlation matrix
+library(corrplot)
+corrplot(cor_matrix,  method = 'circle', type = 'upper')
+```
+
+## Correlation Analysis
+
+#### Insights from Correlation Matrix
+
+-   **Strong Correlations**:
+    -   Positive correlation between **hp** (horsepower) and **mpg** (miles per gallon).
+    -   Negative correlation between **wt** (weight) and **mpg**.
+
+#### Conclusion
+
+-   EDA highlights key relationships and patterns within the dataset, informing subsequent modeling approaches.
+
+\normalsize
+
+# Linear Regression
+
+## Simple Linear Regression
+
+### Definition
+
+-   Simple Linear Regression models the relationship between a dependent variable $Y$ and one independent variable $X$.
+-   The goal is to predict or explain $Y$ as a linear function of $X$.
+
+### Formula
+
+- The mathematical model for simple linear regression is: $Y = \beta_0 + \beta_1 X + \epsilon$
+  -   $\beta_0$: Intercept (the value of $Y$ when $X = 0$)
+  -   $\beta_1$: Slope (the change in $Y$ for a unit increase in $X$)
+  -   $\epsilon$: Error term (accounts for the variability in $Y$ that is not explained by $X$)
+
+### Application
+
+-   Used for tasks such as predicting fuel efficiency based on vehicle weight (e.g., using `mpg` as $Y$ and `wt` as $X$ from the mtcars dataset).
+
+## Regression of mpg on wt
+
+```{r}
+# Simple Linear Regression in R
+model <- lm(mpg ~ wt, data = mtcars)
+model
+```
+\normalsize
+
+## Regression of mpg on wt
+
+\tiny
+
+```{r}
+# Simple Linear Regression in R
+summary(model)
+```
+\normalsize
+
+## Regression of mpg on wt
+
+\tiny
+
+```{r, fig.cap="Regression of mpg on wt", out.height="50%"}
+# Plot
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_point() +
+  geom_smooth(method = "lm", col = "blue") +
+  labs(title = "Simple Linear Regression: mpg vs wt",
+       x = "Weight (1000 lbs)",
+       y = "Miles per Gallon (mpg)")
+```
+
+\normalsize
+
+#### Interpretation
+
+-   \*\*Slope ($\beta_0$) : Indicates the decrease in miles per gallon for every additional 1000 lbs of weight.
+
+-   \*\*Intercept ($\beta_1$): Predicts the mpg when weight is 0 (although not meaningful in this context).
+
+## Fitted values and residuals
+\tiny
+```{r, out.height="50%"}
+library(broom)
+ggplot(augment(model), aes(wt, mpg)) +
+  geom_point() +
+  stat_smooth(method = lm, se = FALSE) +
+  geom_segment(aes(xend = wt, yend = .fitted), color = "red", size = 0.3)
+```
+
+# Multiple Linear Regression
+
+## Multiple Linear Regression with Two Factors
+
+### Definition
+
+-   Multiple Linear Regression models the relationship between a dependent variable $Y$ and two or more independent variables.
+
+### Formula
+
+-   The model for multiple linear regression with two independent variables $(X_1$ and $X_2$) is:
+
+$Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \epsilon$
+
+-   $ \beta_1 $: The effect of $X_1$ on $Y$, holding $X_2$ constant.
+-   $ \beta_2 $: The effect of $X_2$ on $Y$, holding $X_1$ constant.
+
+### Application
+
+-   We can extend the mpg model by adding an additional factor, such as horsepower (hp) and weight (wt) as predictors of mpg.
+
+## Regression of mpg on wt and hp
+
+```{r}
+# Multiple Linear Regression in R
+model2 <- lm(mpg ~ wt + hp, data = mtcars)
+model2
+```
+\normalsize
+
+## Regression of mpg on wt and hp
+
+\tiny
+
+```{r}
+# Multiple Linear Regression in R
+summary(model2)
+```
+\normalsize
+
+## Regression of mpg on wt and hp
+
+### Interpretation
+
+-   **Coefficients**:
+    -   The coefficient for **wt** shows the change in mpg for every unit change in weight, holding horsepower constant.
+
+    -   The coefficient for **hp** shows the change in mpg for every unit change in horsepower, holding weight constant.
+
+-   **Multiple R-squared**: Indicates how well the model explains the variability in mpg.
+
+
+
+# Assumptions of Linear Regression
+
+## Key Assumptions
+1. **Linearity**:
+   - The relationship between the independent and dependent variables must be linear.
+   - This can be checked visually using scatter plots or residual plots.
+   
+2. **Independence**:
+   - Observations should be independent of each other.
+   - This is important for the validity of statistical inferences.
+
+3. **Homoscedasticity**:
+   - The residuals (errors) should have constant variance across all levels of the independent variables.
+   - Can be checked using residual vs. fitted value plots.
+
+4. **Normality of Residuals**:
+   - The residuals should follow a normal distribution.
+   - This can be checked using a Q-Q plot or a histogram of residuals.
+
+5. **No Multicollinearity (for Multiple Regression)**:
+   - Independent variables should not be highly correlated with each other.
+   - This can be checked using a correlation matrix or the Variance Inflation Factor (VIF).
+   
+## Diagnostic Plots in R   
+```{r, eval=FALSE, out.height="50%"}
+# Diagnostic plots for model2
+par(mfrow = c(2, 2), mar = c(4, 4, 2, 1) )
+plot(model)
+```
+
+## Diagnostic Plots in R   
+
+```{r, out.height="60%", echo=FALSE}
+# Diagnostic plots for model2
+par(mfrow = c(2, 2), mar = c(4, 4, 2, 1) )
+plot(model)
+```
+
+
+## Interpretation
+- Residuals vs Fitted: Checks for linearity and homoscedasticity.
+- Q-Q Plot: Checks for normality of residuals.
+- Scale-Location Plot: Checks for homoscedasticity.
+- Residuals vs Leverage: Identifies influential points.- 
+
+## No Autocorrelation
+- **Definition**: The residuals should not be correlated with each other.
+- This assumption is crucial when working with time series or spatial data, where observations might be dependent over time or space.
+  
+- **How to check**: 
+  - Plot residuals over time (for time series data).
+  - Use statistical tests like the **Durbin-Watson Test**.
+  
+\tiny   
+```{r}
+# Durbin-Watson test for autocorrelation
+library(lmtest)
+dwtest(model2)
+```
+\normalsize
+
+## Checking Linearity
+
+- The relationship between the independent variables and the dependent variable should be linear.
+
+
+### How to check:
+1. **Scatter Plot**: Plot each predictor against the response variable.
+2. **Residuals vs Fitted Values**: Check for non-random patterns in the residuals.
+
+## Checking Linearity
+
+\tiny
+```{r, fig.cap="Residuals vs Fitted Values Plot", out.height="50%" }
+# Checking Linearity using Residuals vs Fitted Plot
+model <- lm(mpg ~ wt + hp, data = mtcars)
+plot(model, which = 1)
+
+```
+## Checking Linearity
+#### Interpretation
+- If the residuals are randomly scattered around zero with no clear pattern, the linearity assumption is likely satisfied.
+
+\normalsize
+
+
+## Checking Independence
+- Observations should be independent of one another.
+\tiny
+### How to check:
+1. **Durbin-Watson Test**: Used for detecting autocorrelation in residuals, particularly in time-series data.
+
+```{r, fig.cap="Durbin-Watson Test"}
+# Checking Independence using Durbin-Watson Test
+library(lmtest)
+dwtest(model)
+```
+
+#### Interpretation
+- A Durbin-Watson statistic close to 2 indicates no autocorrelation in the residuals.
+
+\normalsize
+
+
+## Checking Homoscedasticity
+- The residuals should have constant variance across all levels of the independent variables.
+
+### How to check:
+1. **Residuals vs Fitted Plot**: Look for a "funnel" shape, indicating heteroscedasticity.
+2. **Breusch-Pagan Test**: A formal statistical test for heteroscedasticity.
+
+## Checking Homoscedasticity
+\tiny
+```{r, fig.cap="Residuals vs Fitted Plot",out.height="50%"}
+# Checking Homoscedasticity using Residuals vs Fitted Plot
+plot(model, which = 3)
+```
+
+\normalsize
+
+## Checking Homoscedasticity
+
+```{r}
+# Breusch-Pagan test
+library(lmtest)
+bptest(model)
+```
+
+#### Interpretation
+- If the residuals fan out or show a pattern, the assumption of homoscedasticity may be violated.
+- The Breusch-Pagan test p-value should be greater than 0.05 to satisfy this assumption.
+
+\normalsize
+
+## Checking Normality of Residuals
+
+- The residuals should follow a normal distribution.
+
+### How to check:
+1. **Q-Q Plot**: Visually assess the normality of residuals.
+2. **Shapiro-Wilk Test**: A statistical test for normality.
+
+## Checking Normality of Residuals
+\tiny
+```{r, fig.cap="Q-Q Plot",out.height="50%"}
+# Checking Normality using Q-Q Plot
+plot(model, which = 2)
+```
+
+## Checking Normality of Residuals
+```{r}
+# Shapiro-Wilk test
+shapiro.test(residuals(model))
+```
+#### Interpretation
+- If the points in the Q-Q plot roughly follow a straight line, the residuals are approximately normally distributed.
+- A p-value > 0.05 in the Shapiro-Wilk test suggests the residuals are normally distributed.
+
+## Checking for Multicollinearity
+- Independent variables should not be highly correlated with each other.
+
+### How to check:
+1. **Variance Inflation Factor (VIF)**: Detects the presence of multicollinearity.
+2. **Correlation Matrix**: Visually inspect correlations between variables.
+
+```{r, fig.cap="Variance Inflation Factor (VIF)"}
+# Checking Multicollinearity using VIF
+library(car)
+vif(model)
+```
+
+## Checking for Multicollinearity
+
+```{r}
+# Correlation matrix of predictors
+cor(mtcars[, c("wt", "hp", "mpg")])
+```
+
+
+### Interpretation
+- VIF values greater than 2 indicate problematic multicollinearity.
+- High correlations between predictors in the correlation matrix suggest multicollinearity.
+
+
+# Logistic Regression
+## Logistic Regression
+- Logistic regression is used when the dependent variable is categorical (binary or dichotomous).
+- It models the probability that a given outcome occurs, based on one or more independent variables.
+
+### Formula
+- The logistic regression model is:
+
+  $$ \log\left(\frac{p}{1 - p}\right) = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \dots + \beta_n X_n $$
+
+  - Where  `p` is the probability of the outcome of interest.
+
+### Example Application
+- We'll model whether a car has high mpg (above 20) based on weight (`wt`) and horsepower (`hp`).
+
+## Logistic Regression Example (mtcars)
+### Binary Outcome: High vs. Low mpg
+Logistic regression is used when the dependent variable is binary (e.g., 0/1 or Yes/No).
+
+Since mtcars doesn't contain a direct binary outcome variable, we can create one for demonstration purposes, such as whether a car has high vs. low miles-per-gallon (mpg > 20 or not).
+\tiny
+```{r, fig.cap="Logistic Regression: High vs. Low mpg"}
+# Create binary outcome for mpg
+mtcars$mpg_high <- ifelse(mtcars$mpg > 20, 1, 0)
+```
+
+
+```{r, fig.cap="Logistic Regression: High vs. Low mpg"}
+# Logistic regression model
+log_model <- glm(mpg_high ~ wt + hp, data = mtcars, family = binomial)
+log_model
+
+```
+
+## Logistic Regression Example (mtcars)
+\tiny
+```{r}
+summary(log_model)
+```
+
+### Interpretation
+- Coefficients: The log-odds of high mpg decrease as weight or horsepower increase.
+- Odds Ratio: The exponentiated coefficients represent the odds of having high mpg given a one-unit increase in weight or horsepower.
+
+
+## Key Assumptions of Logistic Regression
+1. **Linearity of the Logit**
+   - The relationship between the independent variables and the log-odds of the dependent variable should be linear.
+
+2. **Independence of Errors**
+   - Observations should be independent of each other.
+
+3. **No Multicollinearity**
+   - Independent variables should not be highly correlated with each other.
+
+4. **Adequate Sample Size**
+   - A sufficient number of events for each predictor is necessary for stable estimates.
+
+We'll explore how to check these assumptions and interpret the results.
+
+## Linearity of the Logit
+- The relationship between the log-odds of the outcome and each predictor should be linear.
+
+### How to check:
+1. **Box-Tidwell Test**: A statistical test to check linearity of the logit.
+
+\tiny
+```{r, fig.cap="Box-Tidwell Test for Linearity of Logit"}
+# Checking Linearity of Logit using Box-Tidwell Test
+mtcars$log_wt <- log(mtcars$wt)
+log_model_test <- glm(mpg_high ~ wt + I(wt * log_wt) + hp, data = mtcars, family = binomial)
+summary(log_model_test)
+```
+
+Interpretation
+- If the interaction term ($wt \times log(wt)$) is significant, the linearity assumption is violated.
+
+## Independence of Errors
+- Residuals (errors) should be independent across observations.
+
+### How to check:
+1. **Durbin-Watson Test**: Used to check for autocorrelation in residuals (as in linear regression).
+
+```{r, fig.cap="Durbin-Watson Test for Independence"}
+# Checking independence of errors using Durbin-Watson Test
+dwtest(log_model)
+```
+
+### Interpretation
+- A Durbin-Watson statistic close to 2 indicates that the errors are independent.
+
+## No Multicollinearity
+- Independent variables should not be highly correlated.
+
+### How to check:
+1. **Variance Inflation Factor (VIF)**: Detects multicollinearity.
+2. **Correlation Matrix**: Visualize correlations between predictors.
+
+```{r, fig.cap="VIF for Logistic Regression"}
+# Checking Multicollinearity using VIF
+vif(log_model)
+```
+
+
+## No Multicollinearity
+
+```{r}
+# Correlation matrix for predictors
+cor(mtcars[, c("wt", "hp")])
+```
+
+
+### Interpretation
+- VIF values greater than 5 suggest problematic multicollinearity.
+- High correlations in the correlation matrix also indicate multicollinearity.
+
+## Adequate Sample Size
+- Logistic regression requires a sufficient number of events (positive cases) per predictor.
+
+### How to check:
+1. **Events per Variable (EPV)**: A rule of thumb is at least 10 events (cases where the outcome is 1) per independent variable.
+
+```{r}
+# Check how many events we have for the binary outcome
+table(mtcars$mpg_high)
+```
+
+### Interpretation
+- Ensure that the number of events (cases where mpg_high == 1) divided by the number of predictors is greater than 10.
+
+## Model Diagnostics – Residuals and Influential Points
+### Diagnostic Plots
+- Even though logistic regression doesn’t assume homoscedasticity or normality of residuals, checking residuals for extreme values and influential points is still useful.
+
+### How to check:
+1. **Residuals vs Fitted Plot**: Look for extreme residuals.
+2. **Cook’s Distance**: Identify influential points.
+
+## Model Diagnostics – Residuals and Influential Points
+\tiny
+```{r, fig.cap="Residuals vs Fitted Plot for Logistic Model",out.height="50%"}
+# Residuals vs Fitted Plot for Logistic Regression
+plot(log_model, which = 1)
+```
+
+## Model Diagnostics – Residuals and Influential Points
+
+### Cook's Distance to identify influential points
+\tiny
+```{r, out.height="50%"}
+cooksd <- cooks.distance(log_model)
+plot(cooksd, type = "h", main = "Cook's Distance for Influential Points")
+```
+\tiny
+#### Interpretation
+- Residuals vs Fitted Plot: Look for residuals that significantly deviate from the main cluster.
+- Cook's Distance: Points with high Cook's Distance (> 1) could be influential.
+
+Interpreting Odds Ratios
+## Odds Ratios
+- Logistic regression coefficients are in log-odds. To interpret them in more intuitive terms, we can exponentiate the coefficients to get **odds ratios**.
+
+## Formula
+
+$\text{Odds Ratio} = e^{\beta}$
+
+- This tells us the change in odds for a one-unit change in the predictor.
+
+```{r, fig.cap="Odds Ratios for Logistic Regression"}
+# Calculate Odds Ratios
+exp(coef(log_model))
+```
+
+### Interpretation
+- For each unit increase in weight (wt), the odds of having high mpg decrease by the calculated odds ratio.
+- For each unit increase in horsepower (hp), the odds of having high mpg also decrease by the calculated odds ratio.
+
+
+## Thank You!
+
+-   Thank you for your attention!
+-   Feel free to reach out with any questions.
+
+### Contact:
+
+-   **Email**: mahesh.divakaran01\@gmail.com
+-   **LinkedIn**: [linkedin.com/in/imaheshdivakaran](https://www.linkedin.com/in/imaheshdivakaran)
